@@ -13,7 +13,7 @@ exports.signup = (req, res) => {
     User.findOne({email: req.body.email}).then(user => {
         //check if user already exists
         if(user){
-            res.status(400).json({message: "Email already exists"});
+            res.status(400).json({error: "Email already exists"});
         }else{
             //save user
             const newUser = new User(req.body);
@@ -48,7 +48,7 @@ exports.signin = (req, res) => {
         if(err || !user){
             //user not found
             return res.status(400).json({
-                err: "User does not exist, please sign up"
+                error: "User does not exist, please sign up"
             });
         }
         //if user is found, ensure email and password match

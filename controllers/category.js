@@ -1,6 +1,7 @@
 const Category = require('../models/category');
 const {errorHandler} = require('../helpers/dbErrorHandler');
 
+//create a new category
 exports.create = (req, res) => {
     const category = new Category(req.body);
     category.save((err, data) => {
@@ -14,7 +15,7 @@ exports.create = (req, res) => {
         })
 };
 
-//runs each time categoryId exists in route param
+//runs each time categoryId exists in route param - returns the category
 exports.categoryById = (req, res, next, id) => {
     Category.findById(id).exec((err, category) => {
         if(err || !category){

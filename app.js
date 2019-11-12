@@ -5,6 +5,7 @@ require("dotenv").config();
 const morgan = require('morgan');//alows you see routes requested in the console. goog for development
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');//enables api to handle request from different origin
 const expressValidator = require('express-validator');
 
 //import routes
@@ -30,6 +31,7 @@ app.use(morgan("dev"));//displays routes being called in the console
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(expressValidator());
+app.use(cors());
 
 
 //routes middleware

@@ -21,9 +21,10 @@ const productSchema = new mongoose.Schema({
         maxlength: 32
     },
     //when we refer to the product category, it will go to the category model -- relationship 
+    //this field will hold the __ids fro category model
     category: {
-        type: ObjectId,//mongoose schema.ObjectId
-        ref: 'Category',//relates to the Category model
+        type: ObjectId,//mongoose schema.ObjectId, can also use Number, string and buffer
+        ref: 'Category',//relates to the Category model, tells mongoose to use Category model during population 
         required: true
     },
     quantity: {

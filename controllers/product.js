@@ -118,6 +118,7 @@ exports.update = (req, res) => {
     });
 }
 
+//creates a new product
 exports.create = (req, res) => {
     //init formidabble to handle
     let form = new formidable.IncomingForm();
@@ -185,10 +186,11 @@ exports.create = (req, res) => {
  * sell - show most sold items 
  * arrivals - newly created products
  * 
- * how to build query for sell:  /products?sortBy=sold&order=desc&limit=4
+ * how to build query for sell:  
+ * /products?sortBy=sold&order=desc&limit=4  - this query will come from the frontend app eg react
  * how to build query for arrival:  /products?sortBy=createdAt&order=desc&limit=4
  * 
- * if no params are sent all methods are returne
+ * if no params are sent, all methods are returned
  */
 //for query param eg /:id use req.param
 //for query strings eg /products?id use req.query
@@ -200,12 +202,13 @@ exports.create = (req, res) => {
      
      let sortBy = req.query.sortBy ? req.query.sortBy : '_id';//sort by id is default
 
-     let limit = req.query.limit ? req.query.limit : 6 ;//fetch limit of 6 products by default
+     let limit = req.query.limit ? parseInt(req.query.limit) : 6 ;//fetch limit of 6 products by default
+     //without parseInt, it will treat the limit from the query as string
 
      //grab product from db based on this criteria above
      Product.find()
         .select("-photo")//hyphen '-' ecludes or deselects photos, will slow down app
-        .populate('category')//get category. enabled by the category field set in product model
+        .populate('category')//get category details. enabled by the category field set in product model
         .sort([[sortBy, order]])//sort by sortBy and order
         .limit(limit)
         .exec((err, products) => {
@@ -215,6 +218,117 @@ exports.create = (req, res) => {
                 });
             }
             //if product is found
-            res.send(products);
+            res.json(products);//returns all the products based on the query
         })
+ };
+
+ /**
+  * will find other products that are related to the product (req.product) whose id was supplied 
+  * in the route param -- excluding the product itself, representted by {$ne: req.product} $ne means 'not including'
+  * in other words, it returns its siblings. 
+  * i.e other products that are in the same category as it - category: req.product.category
+  */
+ exports.listRelated = (req, res) => {
+    let limit = req.query.limit ? parseInt(req.query.limit) : 6 ;
+
+    Product.find({_id: {$ne: req.product}, category: req.product.category})
+    .limit(limit)
+    .populate('category', '_id name')//populate the category field in product model with id and name from the Category it references
+    .exec((err, products) => {
+        if(err){
+            return res.status(400).json({
+                error: 'Products not found'
+            });
+        }
+        res.json(products);
+    })
+ };
+
+
+//fetches all this categories that are used in the Product Model
+//here we use the distinct method -- distinct to the Product Model
+ exports.listCategories = (req, res) => {
+    Product.distinct("category", {}, (err, categories) => {
+        if(err){
+            return res.status(400).json({
+                error: 'categories not found'
+            });
+        }
+        res.json(categories);
+    });
+ };
+
+
+
+ /**
+  * list products by search
+  * product search will be implemented in the react frontend
+  *  categories will be shown in checkboxes and price range in radio buttons
+  * as the user clicks on those checkbox and radio buttons
+  * an api request will be made and then show the products to the user based on what he wants
+  */
+ exports.listBySearch = (req, res) => {
+     //these queries can be added to the route param
+    let order = req.query.order ? req.query.order : 'desc';
+    let sortBy = req.query.sortBy ? req.query.sortBy : '_id';
+    let limit = req.query.limit ? parseInt(req.query.limit) : 100;
+    let skip = parseInt(req.body.skip); //will be called when user clicks on 'load more' to view more products
+    let findArgs = {};//will contain the category id and price range; will be populated from the request body
+
+    for(let key in req.body.filters){//grab the key from the request body object
+        if(req.body.filters[key].length > 0){//check if the length of the key > 0
+            if(key === "price"){//check if the key is the string/word 'price'
+                //$gte and $lte are keys we can use in mongodb just like $ne
+                //gte - greater than price [0-10]
+                //lte - less than
+                findArgs[key] = {
+                    //get key greater than 0
+                    $gte: req.body.filters[key][0],//first element at index 0 = 0  ie [0-10], or [10-20] etc
+                    //get key less than 1
+                    $lte: req.body.filters[key][1],////second element at index 1 = 10 ie [0-10]
+                };
+            }else{
+                //otherwise grab the keys which will be the categories
+                findArgs[key] = req.body.filters[key];
+            }
+        }
+    }
+
+    //perform product search using the key obtained above
+    Product.find(findArgs)
+        .select("-photo")//exclude product photo
+        .populate("category")
+        .sort([[sortBy, order]])
+        .skip(skip)
+        .limit(limit)
+        .exec((err, data) => {
+            if(err){
+                return res.status(400).json({
+                    error: 'Products not found'
+                });
+            }
+
+            res.json({
+                size: data.length,//number of products
+                data
+            });
+        });
+    
+ };
+
+
+ //returns product photo
+ //works as a middleware
+ //runs everytime the route -/product/photo/:productId'- is called
+ //will return the product as a middleware and the app will continue running
+ //the route has productId which calls productById method above which gives us the product in the req object
+ exports.photo = (req, res) => {
+    //check if the photo exists
+    if(req.product.photo.data){
+        //set the content type eg image/jpeg
+        res.set("Content-Type", req.product.photo.contentType);
+        return res.send(req.product.photo.data);
+    }
+
+    next();
  };
