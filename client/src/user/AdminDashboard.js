@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom';
 const AdminDashboard = () => {
 
     //use destructuring to pull out user info from isAuthenticated
-    const {user: {_id, name, email, role}} = isAuthenticated(); // or use below
+    const {user: {name, email, role}} = isAuthenticated(); // or use below
     //const {user} = isAuthenticated(); then use user.name, user.email etc to access values
 
     //user links

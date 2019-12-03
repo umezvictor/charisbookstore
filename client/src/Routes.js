@@ -9,13 +9,16 @@ import Dashboard from './user/UserDashboard';
 import AdminDashboard from './user/AdminDashboard';
 import PrivateRoute from './auth/PrivateRoute';
 import AdminRoute from './auth/AdminRoute';
+
+import AddCategory from './admin/AddCategory';
+import AddProduct from './admin/AddProduct';
 //privateRoute component checks if a user is logged in and returns a particular
 //and return the component if user is loggged in
 //redirects to login page if not
 //the advantage is that it can be reused for any other component you want to restrict to logged in user
 
 //nb, this Routes component returns the entire component
-//use to to replace the default App component in index.js
+//used to replace the default App component in index.js
 const Routes = () => {
     return (
         <BrowserRouter>
@@ -26,6 +29,8 @@ const Routes = () => {
             </Switch>
             <PrivateRoute path="/user/dashboard" exact component={Dashboard} />
             <AdminRoute path="/admin/dashboard" exact component={AdminDashboard} />
+            <AdminRoute path="/create/category" exact component={AddCategory} />
+            <AdminRoute path="/create/product" exact component={AddProduct} />
         </BrowserRouter>
     );
 };
