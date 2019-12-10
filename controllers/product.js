@@ -122,6 +122,7 @@ exports.update = (req, res) => {
 exports.create = (req, res) => {
     //init formidabble to handle
     let form = new formidable.IncomingForm();
+    
     form.keepExtensions = true;//keep file extensions
     //parse formd data
     //req = source
@@ -129,11 +130,13 @@ exports.create = (req, res) => {
     //files
     form.parse(req, (err, fields, files) => {
         if(err){
+            
             return res.status(400).json({
                 error: 'Image could not be uploaded'
             });
         }
 
+       
         //check all fields
         const { name, description, price, category, shipping, quantity } = fields;
 

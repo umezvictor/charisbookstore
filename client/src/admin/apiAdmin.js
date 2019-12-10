@@ -25,22 +25,32 @@ export const createCategory = (userId, token, category) => {
 };
 
 
-// method to create a product
 export const createProduct = (userId, token, product) => {
-    //use return, else will show an error. the promise wont be available and you can't use .then
-return fetch(`${API}/product/create/${userId}`, {
-    method: "POST",
-    headers: {
-        Accept: "application/json",
-        // "Content-Type": "application/json", not included because form data will be sent containing the product image
-        Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(product)//product refers to the form data
+    return fetch(`${API}/product/create/${userId}`, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: product
+    })
+        .then(response => {
+            return response.json();
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
+
+
+// fetch categories from backend
+// this will be ussed to populate the category select field in add product form
+export const getCategories = () => {
+    return fetch(`${API}/categories`, {
+        method: "GET"
     })
     .then(response => {
         return response.json();
     })
-    .catch(err => {
-        console.log(err);
-    });
-};
+    .catch(err => console.log(err));
+}
