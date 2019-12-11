@@ -48,7 +48,7 @@ const AddProduct = () => {
                 })
              }
          })
-     }
+     };
 
     useEffect(() => {
         // poupulate the categories and formdata avaiable

@@ -5,6 +5,7 @@
 //children referes to the content for each page
 import React from 'react';
 import Menu from './Menu';
+import "../styles.css";
 
 //layout can receive props
 const Layout = ({title = "Title", description = "Description", className, children}) => (

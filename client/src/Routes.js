@@ -12,6 +12,7 @@ import AdminRoute from './auth/AdminRoute';
 
 import AddCategory from './admin/AddCategory';
 import AddProduct from './admin/AddProduct';
+import Shop from './core/Shop'; // public route
 //privateRoute component checks if a user is logged in and returns a particular
 //and return the component if user is loggged in
 //redirects to login page if not
@@ -24,6 +25,7 @@ const Routes = () => {
         <BrowserRouter>
             <Switch>
                 <Route path="/" exact component={Home} />
+                <Route path="/shop" exact component={Shop} />
                 <Route path="/signin" exact component={Signin} />
                 <Route path="/signup" exact component={Signup} />
             </Switch>
