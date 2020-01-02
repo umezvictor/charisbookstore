@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Layout from './Layout';
-import {getCategories} from './apiCore';
+import Card from './Card';
+import { getCategories, getFilteredProducts } from './apiCore';
 import Checkbox from './Checkbox';
 import { prices } from './fixedPrices'; // array of price range
 import Radiobox from './Radiobox';
@@ -12,6 +13,8 @@ const Shop = () => {
     // state to hold filters 
     // category holds the array of category ids 
     // price holds abn array of price ranges
+    // myFilters is the name of the state
+    // setMyFilters is the function to update the state
     const [myFilters, setMyFilters] = useState({
         filters: { category: [], price: []}
     });
@@ -21,11 +24,17 @@ const Shop = () => {
     // state for error
     const [error, setError] = useState(false);
     // state for limit and skip parameters which will be sent to backend to make api request for products
-    // based on filtr parameters
-    const [limit, setLimit] = useState(6); // default limit of items to be returned
+    // based on filter parameters
+    const [limit, setLimit] = useState(6); // default limit of items to be returned is 6
     const [skip, setSkip] = useState(0);
+    // state for filtered results
+    const [filteredResults, setFilteredResults] = useState(0);
+
+
+
      // load categories and set form data
     const init = () => {
+        // execute getCategories method
         getCategories().then(data => {
             // check if error exists
             if(data.error){
@@ -38,57 +47,95 @@ const Shop = () => {
         })
     };
 
-    // const loadFilteredResults = newFilters => {
-    //     // 2console.log(newFilters)
-    // }
+
+
+    /**
+     {filteredResults.data.map((product, i) => (
+                                    <Card key={i} product={product}/>
+                                ))}
+     */
+    // this method returns products based on filtered results and saves the data in the state as filteredResults
+    // when products are returned based on filter parameters
+    // use the returned data
+    // whennthis loadFilteredResults function executes, it takes in newFilters, 
+    // which is supplied from handleFilters method 
+    // the out
+    // takes newFilters as parameter when the loadFilteredResults 
+    // function is called when the component mounts using the useEffect hook
+    const loadFilteredResults = newFilters => {
+        //console.log(newFilters)
+        // run the getFilteredproducts method
+        // takes in 3 parameters, skip, limit and filters, which is gotten from handlefilters method
+        getFilteredProducts(skip, limit, newFilters).then(data => {
+            // check if error exists
+            if(data.error){
+                setError(data.error)
+            }else{
+                // update the filteredResults state with the returned data
+                setFilteredResults(data.data);
+            }
+        })
+    };
+
 
 
     // run init function when component mounts
     useEffect(() => {
+        // call the init method
         init();
+        // execute the loadFilteresResults method once component mounts
+        // displays products on the right hand side of the Shop page 
+        loadFilteredResults(skip, limit, myFilters.filters);
     }, [])
 
 
     // handleFilters={handleFilters(filters, 'category')} 
-    // this methis is passed as prop to Chechbox component
-    // returns the array of category ids gotter from Checkbox component
+    // this method is passed as prop to Chechbox component
+    // returns the array of category ids gotten from Checkbox component
     const handleFilters = (filters, filterBy) => {
         // filterBy = category or price
-        // grab myfilters object from state
+        // create newFilters object and add myfilters object from the state to it
         const newFilters = {...myFilters};
+        
         // access the filters property within the myFilters property
-        newFilters.filters[filterBy] = filters;
+       // filterBy = category pr price
+        newFilters.filters[filterBy] = filters; // i.e filters: { category: [], price: []}
         // update filter state
         
 
-        // check if filterBy === price, grab the prive valiues
-        if(filterBy === 'price'){
+        // check if filterBy === price, grab the price valiues
+        if(filterBy === "price"){
             let priceValues = handlePrice(filters);
-            newFilters.filter[filterBy] = priceValues;
+            newFilters.filters[filterBy] = priceValues;
         }
 
+        // load filteredresults, send the categories and price filtered to the backend to fetch products
+        // the result is passed to card component as prop and rendered in shop component
+        loadFilteredResults(myFilters.filters);
+        
+        //update myFilters state
         setMyFilters(newFilters);
     };
 
-    // methiod tp get price values array from fixedprices.js
+    // method to get price values array from fixedprices.js
     const handlePrice = value => {
         // get the price gotten from import { prices } from './fixedPrices';
         const data = prices;
         // init an empty array to hold values
-        let valuesArray = [];
+        let array = [];
         
         // loop through data (which is an object) and check if the id sent from the radiobox matches 
         // what is gotten from the prices array
         for(let key in data){
             if(data[key]._id === parseInt(value)){
                 // set the valuesArray to the array field in the prices array of objects in fixedPrices.js
-                valuesArray = data[key.array];// returns the price range arrayy eg [10, 19]
+                array = data[key.array];// returns the price range arrayy eg [10, 19]
             }
         }
-        return valuesArray;
+        return array;
     };
 
-
+    
     return (
         <Layout title="Shop" description="Buy Christian books" className="container-fluid">
             
@@ -108,7 +155,14 @@ const Shop = () => {
                        
                     
                 </div>
-                        <div className="col-8">{JSON.stringify(myFilters)}</div>
+                        <div className="col-8">
+                            
+                            <h2 className="mb-4">Products</h2>
+                            <div className="row">
+                                {JSON.stringify(filteredResults)}
+                                
+                            </div>
+                        </div>
             </div>
     
         </Layout>

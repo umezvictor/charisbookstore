@@ -24,4 +24,28 @@ export const getCategories = () => {
         return response.json();
     })
     .catch(err => console.log(err));
+};
+
+// fetch products based on  filters
+// this method takes in the filter parameters as arguments and then returns products that match
+// the argument filters represents the array of category ids and price range
+// filters argumemt is set to empty object default
+// used in Shop.js
+export const getFilteredProducts = (skip, limit, filters = {}) => {
+    // skip, limit and filters will be sent as parameter to json.stringify
+    // hence, save them to one location
+    const data = {skip, limit, filters};
+    
+    return fetch(`${API}/products/by/search`, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        return response.json();
+    })
+    .catch(err => console.log(err));
 }

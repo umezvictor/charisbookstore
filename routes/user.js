@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { requireSignin, isAuth, isAdmin } = require('../controllers/auth');
-
 const { userById, read, update } = require('../controllers/user');
 //whenever there is a user id in the route parameter
 //this method will run automatically and make the user available in the req object

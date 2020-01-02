@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 
 // prices will be received as props from fixedPrices.js in Shop component
 // handleFilters is received as props from the parent component Shop.js
-const Radiobox = ({ prices, handleFilters }) => {
+    const Radiobox = ({ prices, handleFilters }) => {
     // set state to 0 by defaull
     // state to hold prices
     const [value, setValue] = useState(0);
